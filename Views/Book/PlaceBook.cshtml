@@ -1,0 +1,182 @@
+﻿@model BookCrossingApp.ViewModels.BookPlaceViewModel
+
+@{
+    ViewData["Title"] = "Place";
+}
+@section Head{
+    <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/css/ol.css" type="text/css">
+    <script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/build/ol.js"></script>
+    <style>
+        .map {
+            height: 400px;
+            width: 100%;
+        }
+
+        .ol-popup {
+            position: absolute;
+            background-color: white;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #cccccc;
+            bottom: 12px;
+            left: -50px;
+            min-width: 280px;
+        }
+
+            .ol-popup:after, .ol-popup:before {
+                top: 100%;
+                border: solid transparent;
+                content: " ";
+                height: 0;
+                width: 0;
+                position: absolute;
+                pointer-events: none;
+            }
+
+            .ol-popup:after {
+                border-top-color: white;
+                border-width: 10px;
+                left: 48px;
+                margin-left: -10px;
+            }
+
+            .ol-popup:before {
+                border-top-color: #cccccc;
+                border-width: 11px;
+                left: 48px;
+                margin-left: -11px;
+            }
+
+        .ol-popup-closer {
+            text-decoration: none;
+            position: absolute;
+            top: 2px;
+            right: 8px;
+        }
+
+            .ol-popup-closer:after {
+                content: "✖";
+            }
+    </style>
+}
+<h1>Place Book</h1>
+
+<h4>Book</h4>
+<hr />
+<dl class="row">
+    <dt class="col-sm-2">
+        @Html.DisplayNameFor(model => model.BCID)
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.BCID)
+    </dd>
+    <dt class="col-sm-2">
+        @Html.DisplayNameFor(model => model.Title)
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.Title)
+    </dd>
+    <dt class="col-sm-2">
+        @Html.DisplayNameFor(model => model.Author)
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.Author)
+    </dd>                   
+</dl>
+<div id="map" class="map"></div>
+<div id="popup" class="ol-popup">
+    <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+    <div id="popup-content"></div>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="PlaceBook">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Longitude"/>
+            <input type="hidden" asp-for="Latitude" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+          
+            <div class="form-group">
+                <label asp-for="PlaceDescription" class="control-label"></label>
+                <input asp-for="PlaceDescription" class="form-control" />
+                <span asp-validation-for="PlaceDescription" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+@section Scripts {
+    <script type="text/javascript">
+        var layer = new ol.layer.Tile({
+            source: new ol.source.OSM()
+        });
+        var center = ol.proj.fromLonLat([30.53, 59.93]); 
+        var view = new ol.View({
+            center: center,
+            zoom: 10
+        });
+
+        var map = new ol.Map({
+            target: 'map',
+            view: view,
+            layers: [layer]
+        });
+
+        var container = document.getElementById('popup');
+        var content = document.getElementById('popup-content');
+        var closer = document.getElementById('popup-closer');
+        var long = document.getElementById('Longitude');
+        var lat = document.getElementById('Latitude');
+
+        var overlay = new ol.Overlay({
+            element: container,
+            autoPan: true,
+            autoPanAnimation: {
+                duration: 250
+            }
+        });
+        map.addOverlay(overlay);
+
+        closer.onclick = function () {
+            overlay.setPosition(undefined);
+            closer.blur();
+            return false;
+        };
+        
+        map.on('singleclick', function (event) {
+            var coordinate = event.coordinate;
+            var longLat = ol.proj.toLonLat(coordinate);
+            long.value = longLat[0].toFixed(4);
+            lat.value = longLat[1].toFixed(4);
+
+            content.innerHTML = '<b>Координаты точки</b><br />Long:' + long.value+' Lat:'+lat.value;
+            overlay.setPosition(coordinate);
+            var userMarkerLayer = new ol.layer.Vector({
+                source: new ol.source.Vector({
+                    features: [
+                        new ol.Feature({
+                            geometry: new ol.geom.Point(coordinate),
+                        })
+                    ]
+                }),
+                style: new ol.style.Style({
+                    image: new ol.style.Icon({
+                        anchor: [0.5, 1],
+                        crossOrigin: 'anonymous',
+                        src: 'https://docs.maptiler.com/openlayers/default-marker/marker-icon.png',
+                    })
+                })
+            });
+            map.addLayer(userMarkerLayer);
+        });
+
+    </script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
