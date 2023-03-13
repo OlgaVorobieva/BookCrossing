@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using BookCrossingApp.Models;
+using BookCrossingApp.Data.Enum;
 
 namespace BookCrossingApp.Data
 {
@@ -22,20 +23,20 @@ namespace BookCrossingApp.Data
                             Title = "Преступление и накзание",
                             //Image = "https://www.eatthis.com/wp-content/uploads/sites/4/2020/05/running.jpg?quality=82&strip=1&resize=640%2C360",
                             Description = "This is the description of the first cinema",
-                            CategoryID = 1,
+                            CategoryID = BookCategories.Fiction,
                             Author = "Dostoevsky",
                             BCID = 1,
-                            Status = 1
+                            Status = BookStatus.OnMap
                          },
                          new Book()
                         {
                             Title = "Бесы",
                             //Image = "https://www.eatthis.com/wp-content/uploads/sites/4/2020/05/running.jpg?quality=82&strip=1&resize=640%2C360",
                             Description = "This is the description of the first cinema",
-                            CategoryID = 1,
+                            CategoryID = BookCategories.Fiction,
                             Author = "Dostoevsky",
                             BCID = 2,
-                            Status = 1
+                            Status = BookStatus.OnMap
                          }
                     });
                     context.SaveChanges();

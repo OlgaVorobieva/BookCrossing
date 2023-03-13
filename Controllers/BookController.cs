@@ -28,7 +28,8 @@ namespace BookCrossingApp.Controllers
         // GET: Books
         public async Task<IActionResult> Index()
         {
-              return View(await _bookRepository.GetAll());
+            var books = await _bookRepository.GetAll();
+            return View(books);
         }
 
         // GET: Books/Details/5
