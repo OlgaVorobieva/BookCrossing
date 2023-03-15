@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using BookCrossingApp.Controllers;
 using BookCrossingApp.Interfaces;
 using BookCrossingApp.Repository;
-using BookCrossingApp.Services;
 using BookCrossingApp.Models;
 
 
@@ -15,7 +14,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IPlaceRepository, PlaceRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IPhotoService, PhotoService>();
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(optionsAction => 
 {

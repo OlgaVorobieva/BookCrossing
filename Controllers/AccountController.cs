@@ -98,6 +98,7 @@ namespace BookCrossingApp.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+
         //[HttpGet]
         //[Route("Account/Welcome")]
         //public async Task<IActionResult> Welcome(int page = 0)
@@ -107,10 +108,10 @@ namespace BookCrossingApp.Controllers
         //        return View();
         //    }
         //    return View();
-            
+
         //}
 
-      //  [HttpGet]
+        //  [HttpGet]
         //public async Task<IActionResult> GetLocation(string location)
         //{
         //    if(location == null)

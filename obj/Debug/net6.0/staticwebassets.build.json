@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "ZZ4fdo7YG8n7wnMXSIuWuLz63c+JHoAXM6Hdijk08Uk=",
+  "Hash": "CGmOowMAVfqtohb8Ir0+aVYTIrstp/RlV7SLLMSLk2g=",
   "Source": "BookCrossingApp",
   "BasePath": "_content/BookCrossingApp",
   "Mode": "Default",
@@ -83,6 +83,23 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\favicon.ico"
+    },
+    {
+      "Identity": "D:\\education\\VisualStudio_Projects\\BookCrossingApp\\BookCrossingApp\\wwwroot\\img\\default.jpg",
+      "SourceId": "BookCrossingApp",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\education\\VisualStudio_Projects\\BookCrossingApp\\BookCrossingApp\\wwwroot\\",
+      "BasePath": "_content/BookCrossingApp",
+      "RelativePath": "img/default.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\img\\default.jpg"
     },
     {
       "Identity": "D:\\education\\VisualStudio_Projects\\BookCrossingApp\\BookCrossingApp\\wwwroot\\js\\site.js",

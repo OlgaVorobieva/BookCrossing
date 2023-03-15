@@ -13,6 +13,10 @@
       "PackagePath": "staticwebassets\\favicon.ico"
     },
     {
+      "Id": "D:\\education\\VisualStudio_Projects\\BookCrossingApp\\BookCrossingApp\\wwwroot\\img\\default.jpg",
+      "PackagePath": "staticwebassets\\img\\default.jpg"
+    },
+    {
       "Id": "D:\\education\\VisualStudio_Projects\\BookCrossingApp\\BookCrossingApp\\wwwroot\\js\\site.js",
       "PackagePath": "staticwebassets\\js\\site.js"
     },
