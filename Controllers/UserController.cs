@@ -11,13 +11,11 @@ namespace BookCrossingApp.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly UserManager<AppUser> _userManager;
-        private readonly IPhotoService _photoService;
 
-        public UserController(IUserRepository userRepository, UserManager<AppUser> userManager, IPhotoService photoService)
+        public UserController(IUserRepository userRepository, UserManager<AppUser> userManager)
         {
             _userRepository = userRepository;
             _userManager = userManager;
-            _photoService = photoService;
         }
 
         [HttpGet("users")]
@@ -31,7 +29,7 @@ namespace BookCrossingApp.Controllers
                 {
                     Id = user.Id,
                     UserName = user.UserName,
-                    ProfileImageUrl = user.ProfileImageUrl ?? "/img/avatar-male-4.jpg",
+                    ProfileImageUrl = user.ProfileImageUrl ?? "/img/default.jpg",
                 };
                 result.Add(userViewModel);
             }
@@ -51,13 +49,13 @@ namespace BookCrossingApp.Controllers
             {
                 Id = user.Id,
                 UserName = user.UserName,
-                ProfileImageUrl = user.ProfileImageUrl ?? "/img/avatar-male-4.jpg",
+                ProfileImageUrl = user.ProfileImageUrl ?? "/img/default.jpg",
             };
             return View(userDetailViewModel);
         }
 
         [HttpGet]
-        [Authorize]
+     //   [Authorize]
         public async Task<IActionResult> EditProfile()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -75,7 +73,7 @@ namespace BookCrossingApp.Controllers
         }
 
         [HttpPost]
-        [Authorize]
+ //       [Authorize]
         public async Task<IActionResult> EditProfile(EditProfileViewModel editVM)
         {
             if (!ModelState.IsValid)
@@ -93,23 +91,23 @@ namespace BookCrossingApp.Controllers
 
             if (editVM.Image != null) // only update profile image
             {
-                var photoResult = await _photoService.AddPhotoAsync(editVM.Image);
+                //var photoResult = await _photoService.AddPhotoAsync(editVM.Image);
 
-                if (photoResult.Error != null)
-                {
-                    ModelState.AddModelError("Image", "Failed to upload image");
-                    return View("EditProfile", editVM);
-                }
+                //if (photoResult.Error != null)
+                //{
+                //    ModelState.AddModelError("Image", "Failed to upload image");
+                //    return View("EditProfile", editVM);
+                //}
 
-                if (!string.IsNullOrEmpty(user.ProfileImageUrl))
-                {
-                    _ = _photoService.DeletePhotoAsync(user.ProfileImageUrl);
-                }
+                //if (!string.IsNullOrEmpty(user.ProfileImageUrl))
+                //{
+                //    _ = _photoService.DeletePhotoAsync(user.ProfileImageUrl);
+                //}
 
-                user.ProfileImageUrl = photoResult.Url.ToString();
-                editVM.ProfileImageUrl = user.ProfileImageUrl;
+                //user.ProfileImageUrl = photoResult.Url.ToString();
+                //editVM.ProfileImageUrl = user.ProfileImageUrl;
 
-                await _userManager.UpdateAsync(user);
+                //await _userManager.UpdateAsync(user);
 
                 return View(editVM);
             }
