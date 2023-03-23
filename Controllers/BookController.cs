@@ -10,6 +10,8 @@ using BookCrossingApp.Models;
 using BookCrossingApp.Interfaces;
 using BookCrossingApp.ViewModels;
 using System.Globalization;
+using BookCrossingApp.Data.Enum;
+using Microsoft.AspNetCore.Identity;
 
 namespace BookCrossingApp.Controllers
 {
@@ -17,11 +19,15 @@ namespace BookCrossingApp.Controllers
     {
         private readonly IBookRepository _bookRepository;
         private readonly IPlaceRepository _placeRepository;
+        private readonly UserManager<AppUser> _userManager;
 
-        public BookController(IBookRepository bookRepository, IPlaceRepository placeRepository)
+        public BookController(IBookRepository bookRepository, 
+            IPlaceRepository placeRepository, 
+            UserManager<AppUser> userManager1 )
         {
             _bookRepository = bookRepository;
             _placeRepository = placeRepository;
+            _userManager = userManager1;
         }
 
         // GET: Books
@@ -69,7 +75,19 @@ namespace BookCrossingApp.Controllers
             return View(book);
         }
 
-        // GET: Books/Place/5
+
+        public async Task<JsonResult> GetByPlaceId(int id)
+        {
+            var place = await _placeRepository.GetByIdAsync(id);
+            if (place != null)
+            {
+                var result = await _bookRepository.GetByIdAsync(place.BookId);
+                return Json(result); 
+            }
+            return Json(null);
+        }
+
+        // GET: Books/PlaceBook/5
         public async Task<IActionResult> PlaceBook(int? id)
         {
 
@@ -107,20 +125,24 @@ namespace BookCrossingApp.Controllers
                 return NotFound();
             }
             var result = false;
-            if (ModelState.IsValid)
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (ModelState.IsValid && currentUser != null)
             {
                 var place = new Place
                 {
                     BookId = id,
-                    //Latitude = Convert.ToSingle(bookVM.Latitude),
-                    //Longitude = Convert.ToSingle(bookVM.Longitude),
                     Description = bookVM.PlaceDescription,
-                    UserId = 1
+                    UserId = currentUser.Id,
+                    Date = DateTime.Now,
+                    Status = PlaceStatus.Active
                 };
                 var culture = new CultureInfo("en-US");
                 place.Longitude = Single.Parse(bookVM.Longitude, culture);
                 place.Latitude = Single.Parse(bookVM.Latitude, culture);
+
+                //should be in one transaction
                 result = _placeRepository.Add(place);
+                result = await _bookRepository.ChangeBookStatus(id, BookStatus.OnMap);
             }
 
             if (!result)

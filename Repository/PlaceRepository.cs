@@ -1,4 +1,5 @@
 ﻿using BookCrossingApp.Data;
+using BookCrossingApp.Data.Enum;
 using BookCrossingApp.Interfaces;
 using BookCrossingApp.Models;
 using Microsoft.EntityFrameworkCore;
@@ -14,9 +15,14 @@ namespace BookCrossingApp.Repository
             _context = context;
         }
 
-        public async Task<IEnumerable<Place>> GetAll()
+        public async Task<Place?> GetByIdAsync(int id)
         {
-            return await _context.Places.ToListAsync();
+            return await _context.Places.FirstOrDefaultAsync(i => i.Id == id);
+        }
+
+        public async Task<IEnumerable<Place>> GetAllActive()
+        {
+            return await _context.Places.Where( x=> x.Status==PlaceStatus.Active).ToListAsync();
         }
 
         public bool Add(Place place)
@@ -41,5 +47,7 @@ namespace BookCrossingApp.Repository
             var saved = _context.SaveChanges();
             return saved > 0;
         }
+
+
     }
 }
