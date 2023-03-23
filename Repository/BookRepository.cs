@@ -1,4 +1,5 @@
 ﻿using BookCrossingApp.Data;
+using BookCrossingApp.Data.Enum;
 using BookCrossingApp.Interfaces;
 using BookCrossingApp.Models;
 using Microsoft.EntityFrameworkCore;
@@ -66,6 +67,15 @@ namespace BookCrossingApp.Repository
             return saved > 0;
         }
 
-
+        public async Task<bool> ChangeBookStatus(int bookId, BookStatus status)
+        {
+            var book = await GetByIdAsync(bookId);
+            if (book != null)
+            {
+                book.Status = status;
+                return Save(); 
+            }
+            return false;
+        }
     }
 }

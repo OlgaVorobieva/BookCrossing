@@ -1,4 +1,5 @@
-﻿using BookCrossingApp.Models;
+﻿using BookCrossingApp.Data.Enum;
+using BookCrossingApp.Models;
 
 namespace BookCrossingApp.Interfaces
 {
@@ -11,5 +12,7 @@ namespace BookCrossingApp.Interfaces
         Task<int> GetCountAsync();
         bool Save();
         bool Update(Book book);
+        Task<bool> ChangeBookStatus(int bookId, BookStatus onMap);
+
     }
 }

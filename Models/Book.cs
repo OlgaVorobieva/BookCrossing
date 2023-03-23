@@ -1,5 +1,6 @@
 ﻿using BookCrossingApp.Data.Enum;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BookCrossingApp.Models
 {
@@ -13,6 +14,9 @@ namespace BookCrossingApp.Models
         public BookCategories CategoryID { get; set; }
         public string? Description { get; set; }
         public BookStatus Status { get; set; }
+
+        [ForeignKey("User")]
+        public string? CreatorUserId { get; set; }
 
     }
 }

@@ -15,7 +15,7 @@ namespace BookCrossingApp.Controllers
 
         public async Task<JsonResult> GetBooksPlaces()
         {
-            var data = await _placeRepository.GetAll();
+            var data = await _placeRepository.GetAllActive();
             var result = data.Select(
                 p => new AllBooksViewModel { Id = p.Id, Latitude = p.Latitude, Longitude = p.Longitude })
                 .ToList();

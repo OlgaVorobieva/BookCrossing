@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using BookCrossingApp.Data.Enum;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BookCrossingApp.Models
@@ -11,10 +12,14 @@ namespace BookCrossingApp.Models
         public float Latitude { get; set; }
 
         [ForeignKey("User")]
-        public int UserId { get; set; }
+        public string? UserId { get; set; }
         [ForeignKey("Book")]
         public int BookId { get; set; }
-        public int Status { get; set; }
+
+        [ForeignKey("User")]
+        public string? TakerUserId { get; set; }
+        public PlaceStatus Status { get; set; }
         public string? Description { get; set; }
+        public DateTime? Date { get; set; }
     }
 }
