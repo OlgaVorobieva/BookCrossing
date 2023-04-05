@@ -42,12 +42,22 @@ namespace BookCrossingApp.Repository
             //    }
             //}
         }
+        public bool Update(Place place)
+        {
+            _context.Update(place);
+            return Save();
+        }
+
         public bool Save()
         {
             var saved = _context.SaveChanges();
             return saved > 0;
         }
 
+        public async Task<int> GetCountAsync()
+        {
+            return await _context.Places.CountAsync();
+        }
 
     }
 }

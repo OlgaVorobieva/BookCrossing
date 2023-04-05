@@ -23,11 +23,11 @@ namespace BookCrossingApp.Controllers
 
         public BookController(IBookRepository bookRepository, 
             IPlaceRepository placeRepository, 
-            UserManager<AppUser> userManager1 )
+            UserManager<AppUser> userManager )
         {
             _bookRepository = bookRepository;
             _placeRepository = placeRepository;
-            _userManager = userManager1;
+            _userManager = userManager;
         }
 
         // GET: Books
@@ -48,7 +48,7 @@ namespace BookCrossingApp.Controllers
             var book = await _bookRepository.GetByIdAsync(id.Value);
             if (book == null)
             {
-                return NotFound();
+                return NotFound();     
             }
 
             return View(book);
@@ -65,11 +65,14 @@ namespace BookCrossingApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,BCID,Title,Author")] Book book)
+        public async Task<IActionResult> Create([Bind("Id,BCID,Title,Author,Description")] Book book)
         {
             if (ModelState.IsValid)
             {
+                var currentUser = await _userManager.GetUserAsync(User);
+                book.CreatorUserId = currentUser.Id;
                 _bookRepository.Add(book);
+
                   return RedirectToAction(nameof(Index));
             }
             return View(book);
@@ -107,7 +110,6 @@ namespace BookCrossingApp.Controllers
                 BCID = book.BCID,
                 Author = book.Author,
                 Title = book.Title,
-                
 
             };
             return View(bookPlace);
