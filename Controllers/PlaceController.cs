@@ -1,6 +1,9 @@
 ﻿using BookCrossingApp.Interfaces;
+using BookCrossingApp.Models;
+using BookCrossingApp.Repository;
 using BookCrossingApp.ViewModels;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookCrossingApp.Controllers
@@ -8,9 +11,14 @@ namespace BookCrossingApp.Controllers
     public class PlaceController : Controller
     {
         private readonly IPlaceRepository _placeRepository;
-        public PlaceController(IPlaceRepository placeRepository)
+        private readonly IBookRepository _bookRepository;
+        private readonly UserManager<AppUser> _userManager;
+
+        public PlaceController(IPlaceRepository placeRepository, IBookRepository bookRepository, UserManager<AppUser> userManager)
         {
             _placeRepository = placeRepository;
+            _bookRepository = bookRepository;   
+            _userManager = userManager;
         }
 
         public async Task<JsonResult> GetBooksPlaces()
@@ -28,14 +36,68 @@ namespace BookCrossingApp.Controllers
             return View();
         }
 
-        // GET: PlaceController/Details/5
-        public ActionResult Details(int id)
+        // GET: Place/Details/5
+        public async Task<IActionResult> Details(int? id)
         {
-            return View();
+            if (id == null || await _placeRepository.GetCountAsync() == 0)
+            {
+                return NotFound();
+            }
+
+            var place = await _placeRepository.GetByIdAsync(id.Value);
+            if (place == null)
+            {
+                return NotFound();
+            }
+            var book = await _bookRepository.GetByIdAsync(place.BookId);
+            if (book == null)
+            {
+                return NotFound();
+            }
+            var bookPlace = new BookPlaceViewModel()
+            {
+                Id = id.Value,
+                BCID = book.BCID,
+                Author = book.Author,
+                Title = book.Title,
+                Description = book.Description,
+                PlaceDescription = place.Description??string.Empty,
+
+            };
+            return View(bookPlace);
         }
 
-        // GET: PlaceController/Create
-        public ActionResult Create()
+        [HttpPost] 
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> TakeConfirmed(int id)
+        {
+
+            var place = await _placeRepository.GetByIdAsync(id);
+            if (place == null)
+            {
+                return NotFound();
+            }
+           
+            var book = await _bookRepository.GetByIdAsync(place.BookId);
+            if (book == null)
+            {
+                return NotFound();
+            }
+            var currentUser = await _userManager.GetUserAsync(User);
+            // next statements should be one transaction
+            place.Status = Data.Enum.PlaceStatus.Visited;
+            place.TakerUserId = currentUser.Id;
+            _placeRepository.Update(place);
+
+            book.Status = Data.Enum.BookStatus.TakenAway;
+
+            _bookRepository.Update(book);
+
+            return RedirectToAction("AllBooks","Home");
+        }
+
+            // GET: PlaceController/Create
+            public ActionResult Create()
         {
             return View();
         }
