@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using BookCrossingApp.ViewModels;
 using BookCrossingApp.Interfaces;
 using BookCrossingApp.Models;
+using BookCrossingApp.Data;
 
 namespace BookCrossingApp.Controllers
 {
@@ -11,6 +12,7 @@ namespace BookCrossingApp.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly UserManager<AppUser> _userManager;
+
 
         public UserController(IUserRepository userRepository, UserManager<AppUser> userManager)
         {
@@ -23,13 +25,17 @@ namespace BookCrossingApp.Controllers
         {
             var users = await _userRepository.GetAllUsers();
             List<UserViewModel> result = new List<UserViewModel>();
+
             foreach (var user in users)
             {
+                var userRoles = await _userManager.GetRolesAsync(user);
                 var userViewModel = new UserViewModel()
                 {
                     Id = user.Id,
                     UserName = user.UserName,
                     ProfileImageUrl = user.ProfileImageUrl ?? "/img/default.jpg",
+                    isEnabled = user.IsEnabled,
+                    userRole = userRoles.FirstOrDefault()
                 };
                 result.Add(userViewModel);
             }
@@ -50,8 +56,50 @@ namespace BookCrossingApp.Controllers
                 Id = user.Id,
                 UserName = user.UserName,
                 ProfileImageUrl = user.ProfileImageUrl ?? "/img/default.jpg",
+                Points = user.Points,
             };
             return View(userDetailViewModel);
+        }
+
+
+        public async Task<IActionResult> ChangeStatus(string id)
+        {
+            var user = await _userRepository.GetUserById(id);
+            if (user == null)
+            {
+                return RedirectToAction("Index", "Users");
+            }
+
+            user.IsEnabled = user.IsEnabled ? false : true;
+            _userRepository.Update(user);
+
+            return RedirectToAction("Index", "User");
+        }
+
+        public async Task<IActionResult> ChangeRole(string id)
+        {
+            var user = await _userRepository.GetUserById(id);
+            if (user == null)
+            {
+                return RedirectToAction("Index", "Users");
+            }
+
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            if (userRoles.FirstOrDefault() == UserRoles.Admin)
+            {
+                await _userManager.RemoveFromRoleAsync(user, UserRoles.Admin);
+                await _userManager.AddToRoleAsync(user, UserRoles.User);
+            }
+            else
+            {
+                await _userManager.RemoveFromRoleAsync(user,UserRoles.User);
+                await _userManager.AddToRoleAsync(user, UserRoles.Admin);
+            }
+
+            _userRepository.Update(user);
+
+            return RedirectToAction("Index", "User");
         }
 
         [HttpGet]

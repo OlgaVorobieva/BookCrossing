@@ -1,37 +1,52 @@
 ﻿@using BookCrossingApp.Data.Enum
+@using BookCrossingApp.Data
+@using Microsoft.AspNetCore.Identity
+
 @model IEnumerable<BookCrossingApp.Models.Book>
+@inject UserManager<AppUser> UserManager
 
 @{
     ViewData["Title"] = "Index";
+    var currentUser = await UserManager.GetUserAsync(User);
+    var userRole = await UserManager.GetRolesAsync(currentUser);
 }
 
-<h1>Catalog</h1>
+<h1>Каталог</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Добавить книгу</a>
 </p>
-<table class="table">
+<input type="text" id="myInput" placeholder="Поиск по автору и названию...">
+
+
+@Html.DropDownList("bookStatus", Html.GetEnumSelectList(typeof(BookStatus)), "Все книги", new { @onchange="filterTable(this.value)" } )
+
+
+
+<table class="table" id="myTable">
     <thead>
         <tr>
             <th>
                 @Html.DisplayNameFor(model => model.BCID)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Title)
+                Назавание
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Author)
+                Автор
             </th>
             <th>
-                Category
+                Категория
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Description)
+                Описание
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Status)
+                Статус
             </th>
-            <th></th>
+            <th>
+                Фото
+            </th>
             <th></th>
             <th></th>
             <th></th>
@@ -45,7 +60,7 @@
                     @Html.DisplayFor(modelItem => item.BCID)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Title)
+                    <a asp-action="Details" asp-route-id="@item.Id">@item.Title</a>
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Author)
@@ -59,18 +74,55 @@
                 <td>
                     @Html.DisplayFor(modelItem => item.Status)
                 </td>
-               
                 <td>
-                    @if (item.Status != BookStatus.OnMap)
+                    <img alt="Image" src="/img/@item.PictureName" class="avatar avatar-xs" width=80 height=80>
+                </td>
+
+                <td>
+                    @if (item.Status != BookStatus.OnMap && item.CreatorUserId == currentUser.Id)
                     {
-                        <a asp-action="PlaceBook" asp-route-id="@item.Id">Place</a>
+                        <a asp-action="PlaceBook" asp-route-id="@item.Id">Разместить</a>
                     }
                 </td>
-                <td><a asp-action="Edit" asp-route-id="@item.Id">Edit</a> </td>
-                <td><a asp-action="Details" asp-route-id="@item.Id">Details</a> </td>
-                <td><a asp-action="Delete" asp-route-id="@item.Id">Delete</a></td>
-                
+                <td>
+                    @if (item.CreatorUserId == currentUser.Id)
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.Id">Изменить</a>
+                    }
+                </td>
+                <td>
+                    @if (userRole.FirstOrDefault() == UserRoles.Admin)
+                    {
+                        <a asp-action="Delete" asp-route-id="@item.Id">Удалить</a>
+                    }
+                </td>
+
             </tr>
         }
     </tbody>
 </table>
+<script>
+    function filterTable(event) {
+        var filter = document.querySelector('#myInput').value.toUpperCase(); //event.target.value.toUpperCase();
+        var bookStatus = document.querySelector("#bookStatus");
+        var filterStatus = bookStatus.options[bookStatus.selectedIndex].innerText.toUpperCase();
+        var rows = document.querySelector("#myTable tbody").rows;
+
+        for (var i = 0; i < rows.length; i++) {
+            var firstCol = rows[i].cells[1].textContent.toUpperCase();
+            var secondCol = rows[i].cells[2].textContent.toUpperCase();
+            var fifthCol = rows[i].cells[5].textContent.toUpperCase();
+            if ((firstCol.indexOf(filter) > -1 || secondCol.indexOf(filter) > -1) && (filterStatus == "ВСЕ КНИГИ" || fifthCol.indexOf(filterStatus) > -1)) {
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
+    }
+
+    document.querySelector('#myInput').addEventListener('keyup', filterTable, false);
+
+           // document.querySelector('#bookStatus').addEventListener('onselect', filterTable, false);
+
+
+</script>
