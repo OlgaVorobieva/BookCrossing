@@ -1,4 +1,6 @@
-﻿namespace BookCrossingApp.Data
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace BookCrossingApp.Data
 {
     public static class UserRoles
     {

@@ -4,10 +4,10 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Book Place Details</h1>
+<h1>Вы увены, что хотите выбрать эту книгу?</h1>
 
 <div>
-    <h4>Book</h4>
+    <h4>Книга</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
@@ -45,7 +45,7 @@
     <form asp-action="TakeConfirmed">
         <input type="hidden" asp-for="Id" />
         <input type="submit" value="Take" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to All Books</a>
+        <a asp-controller="Home" asp-action="AllBooks">Вернуться к списку книг</a>
     </form>
     
 </div>

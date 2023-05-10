@@ -1,13 +1,12 @@
-﻿@model BookCrossingApp.Models.Book
-
+﻿
+@using BookCrossingApp.ViewModels
+@model BookDetailViewModel
 @{
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
-
 <div>
-    <h4>Book</h4>
+    <h4>Информация О Книге</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
@@ -36,6 +35,56 @@
         </dd>
     </dl>
 </div>
+
+<div>
+    @if (Model.bookHistory != null && Model.bookHistory.Any()) {
+        <h4>История Книги</h4>
+        <table class="table" id="myTable">
+            <thead>
+                <tr>
+                    <th>
+                        Положил книгу
+                    </th>
+                    <th>
+                        Взял книгу
+                    </th>
+                    <th>
+                        Статус
+                    </th>
+                    <th>
+                        Дата
+                    </th>      
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.bookHistory)
+                {
+                    <tr>
+                        <td>
+                         <a asp-controller="User" asp-action="Detail" asp-route-id="@item.GiverUserId">
+                                @item.GiverUserName </a>
+                        </td>
+                        <td>
+                            <a asp-controller="User" asp-action="Detail" asp-route-id="@item.TakerUserId">
+                                @item.TakerUserName </a>
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Status)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Date)
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+    </table>
+    }
+
+</div>
+<h4></h4>
+
+
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>

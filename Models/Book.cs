@@ -18,5 +18,7 @@ namespace BookCrossingApp.Models
         [ForeignKey("User")]
         public string? CreatorUserId { get; set; }
 
+        public string? PictureName { get; set; }    
+
     }
 }

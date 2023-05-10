@@ -12,10 +12,9 @@ namespace BookCrossingApp.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly ApplicationDbContext _context;
-        //private readonly ILocationService _locationService;
 
         public AccountController(UserManager<AppUser> userManager, 
-            SignInManager<AppUser> signInManager, 
+            SignInManager<AppUser> signInManager,
             ApplicationDbContext context)
         {
             _context = context;
@@ -40,6 +39,12 @@ namespace BookCrossingApp.Controllers
             if (user != null)
             {
                 //User is found, check password
+                if (!user.IsEnabled) 
+                {
+                    TempData["Error"] = "Current user is blocked";
+                    return View(loginViewModel);
+                }
+
                 var passwordCheck = await _userManager.CheckPasswordAsync(user, loginViewModel.Password);
                 if (passwordCheck)
                 {
@@ -81,7 +86,9 @@ namespace BookCrossingApp.Controllers
             var newUser = new AppUser()
             {
                 Email = registerViewModel.EmailAddress,
-                UserName = registerViewModel.EmailAddress
+                UserName = registerViewModel.EmailAddress,
+                IsEnabled = true,
+                Points = 0
             };
             var newUserResponse = await _userManager.CreateAsync(newUser, registerViewModel.Password);
 

@@ -13,12 +13,14 @@ namespace BookCrossingApp.Controllers
         private readonly IPlaceRepository _placeRepository;
         private readonly IBookRepository _bookRepository;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IUserRepository _userRepository;
 
-        public PlaceController(IPlaceRepository placeRepository, IBookRepository bookRepository, UserManager<AppUser> userManager)
+        public PlaceController(IPlaceRepository placeRepository, IBookRepository bookRepository, UserManager<AppUser> userManager, IUserRepository userRepository)
         {
             _placeRepository = placeRepository;
             _bookRepository = bookRepository;   
             _userManager = userManager;
+            _userRepository = userRepository;
         }
 
         public async Task<JsonResult> GetBooksPlaces()
@@ -85,6 +87,7 @@ namespace BookCrossingApp.Controllers
             }
             var currentUser = await _userManager.GetUserAsync(User);
             // next statements should be one transaction
+            
             place.Status = Data.Enum.PlaceStatus.Visited;
             place.TakerUserId = currentUser.Id;
             _placeRepository.Update(place);
@@ -93,6 +96,14 @@ namespace BookCrossingApp.Controllers
 
             _bookRepository.Update(book);
 
+            currentUser.Points -= 3;
+            await _userManager.UpdateAsync(currentUser);
+
+            if (place.UserId != null) {
+                var creatorUser = await _userRepository.GetUserById(place.UserId);
+                creatorUser.Points += 3;
+                _userRepository.Update(creatorUser);
+            }
             return RedirectToAction("AllBooks","Home");
         }
 

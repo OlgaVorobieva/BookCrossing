@@ -12,6 +12,7 @@ using BookCrossingApp.ViewModels;
 using System.Globalization;
 using BookCrossingApp.Data.Enum;
 using Microsoft.AspNetCore.Identity;
+using BookCrossingApp.Repository;
 
 namespace BookCrossingApp.Controllers
 {
@@ -19,15 +20,17 @@ namespace BookCrossingApp.Controllers
     {
         private readonly IBookRepository _bookRepository;
         private readonly IPlaceRepository _placeRepository;
+        private readonly IUserRepository _userRepository;
         private readonly UserManager<AppUser> _userManager;
 
         public BookController(IBookRepository bookRepository, 
             IPlaceRepository placeRepository, 
-            UserManager<AppUser> userManager )
+            UserManager<AppUser> userManager, IUserRepository userRepository)
         {
             _bookRepository = bookRepository;
             _placeRepository = placeRepository;
             _userManager = userManager;
+            _userRepository = userRepository;
         }
 
         // GET: Books
@@ -50,8 +53,51 @@ namespace BookCrossingApp.Controllers
             {
                 return NotFound();     
             }
+            List<BookHistoryViewModel> bookHistory = new List<BookHistoryViewModel>();
+            var bookDetail = new BookDetailViewModel
+            {
+                Id = book.Id,
+                BCID = book.BCID,
+                Author = book.Author,
+                Title = book.Title,
+                Description= book.Description,
+                bookHistory = bookHistory
+            };
 
-            return View(book);
+            /// history        
+            var items = await _placeRepository.GetAllPlacesByBookId(book.Id);
+            if (items == null)
+            {
+                return View(bookDetail);
+            }
+            
+
+            foreach (var item in items)
+            {
+                var bookStory = new BookHistoryViewModel()
+                {
+                    Id = item.Id,
+                    GiverUserId = item.UserId,
+                    TakerUserId = item.TakerUserId,
+                    Status = item.Status,
+                    Date = item.Date,
+                };
+
+                var giver = await _userRepository.GetUserById(item.UserId);
+                bookStory.GiverUserName = giver.UserName;
+
+                if (item.TakerUserId != null)
+                {
+                    var taker = await _userRepository.GetUserById(item.TakerUserId);
+                    bookStory.TakerUserName = taker.UserName;
+                }
+
+                bookHistory.Add(bookStory);
+            }
+
+            bookDetail.bookHistory = bookHistory;
+
+            return View(bookDetail);
         }
 
         // GET: Books/Create
@@ -65,15 +111,17 @@ namespace BookCrossingApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,BCID,Title,Author,Description")] Book book)
+        public async Task<IActionResult> Create([Bind("Id,BCID,Title,Author,Description,CategoryID")] Book book)
         {
             if (ModelState.IsValid)
             {
                 var currentUser = await _userManager.GetUserAsync(User);
                 book.CreatorUserId = currentUser.Id;
+                
+                book.PictureName = "default_book.png";
                 _bookRepository.Add(book);
 
-                  return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index));
             }
             return View(book);
         }
@@ -126,6 +174,7 @@ namespace BookCrossingApp.Controllers
             {
                 return NotFound();
             }
+
             var result = false;
             var currentUser = await _userManager.GetUserAsync(User);
             if (ModelState.IsValid && currentUser != null)
@@ -145,6 +194,9 @@ namespace BookCrossingApp.Controllers
                 //should be in one transaction
                 result = _placeRepository.Add(place);
                 result = await _bookRepository.ChangeBookStatus(id, BookStatus.OnMap);
+
+                currentUser.Points += 1;
+                _userRepository.Update(currentUser);
             }
 
             if (!result)
@@ -178,7 +230,7 @@ namespace BookCrossingApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,BCID,Title,Author")] Book book)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Status,PictureName,CreatorUserId,BCID,Title,Author,Description,CategoryID")] Book book)
         {
             if (id != book.Id)
             {
