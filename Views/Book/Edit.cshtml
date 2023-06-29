@@ -6,8 +6,6 @@
 }
 
 <h1>Изменение данных о книге</h1>
-
-<h4>Введите данные требующие измения</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -42,10 +40,27 @@
                 <select asp-for="CategoryID" asp-items="Html.GetEnumSelectList<BookCategories>()" class="form-control"></select>
                 <span asp-validation-for="CategoryID" class="text-danger"></span>
             </div>
+            <label>Фото книги</label>
+                <div class="media flex-wrap mb-0 align-items-center">
+                    @{
+                        var imageUrl = string.IsNullOrEmpty(Model.PictureName)
+                        ? "/img/default.jpg"
+                        : Model.PictureName;
+                    }
+                    <img alt="Image" src="/img/@imageUrl" class="avatar avatar-square mb-3 mb-md-0" />
+                    <div class="media-body">
+                                <span class="btn btn-primary"><i class="icon-upload-to-cloud">&nbsp;</i>Загрузить</span> 
+                                <button id="submit-image-button" type="submit" hidden></button>
+                            <div>
+                                <small>Для лучшего результата, используйте избображение размером минимум 256px на 256px в формате .jpg или .png</small>
+                            </div>
+                    </div>
+                </div>
+                
             <div class="form-group">
                 <input type="submit" value="Сохранить" class="btn btn-primary" />
             </div>
-            </form>
+        </form>
     </div>
 </div>
 
@@ -54,5 +69,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

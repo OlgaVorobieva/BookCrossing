@@ -58,7 +58,7 @@
         }
 </style>
 
-<h2>Show all books</h2>
+<h2>Стоимость каждой книги - 3 балла</h2>
 <div id="map" class="map"></div>
 
 
@@ -106,7 +106,7 @@
                     var url = '/Book/GetByPlaceId/' + trailId;
                     $.getJSON(url, function (data) {
                         if (data != null) {
-                            popup.show(event.coordinate, `${data.author}<br /><b>${data.title}</b><br /><a href='/Place/Details/${trailId}'>Take</a>`);
+                            popup.show(event.coordinate, `${data.author}<br /><b>${data.title}</b><br /><a href='/Place/Details/${trailId}'>Выбрать</a>`);
                         }
                     });
                 }

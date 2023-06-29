@@ -1,10 +1,13 @@
 ﻿@using Microsoft.AspNetCore.Identity
-
+@using BookCrossingApp.Data
+@using BookCrossingApp.Helpers
 @inject SignInManager<AppUser> SignInManager
 @inject UserManager<AppUser> UserManager
 
-@{
+@if (SignInManager.IsSignedIn(User))
+{
     var currentUser = await UserManager.GetUserAsync(User);
+    var userRole = await UserManager.GetRolesAsync(currentUser);
 }
 
 <!DOCTYPE html>
@@ -16,6 +19,7 @@
     <title>@ViewData["Title"] - BookCrossingApp</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BookCrossingApp.styles.css" asp-append-version="true" />
     @RenderSection("Head", required:false)
 </head>
@@ -35,44 +39,44 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Book" asp-action="Index">Catalog</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Book" asp-action="Index">Каталог</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="AllBooks">AllBooks</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="AllBooks">Охота</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Index">Пользователи</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Book" asp-action="Test">Test</a>
-                            </li>
+                            @if (SignInManager.IsSignedIn(User))
+                            {
+                                var currentUser = await UserManager.GetUserAsync(User);
+                                var userRole = await UserManager.GetRolesAsync(currentUser);
+                                if (userRole.FirstOrDefault() == UserRoles.Admin)
+                                { 
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Index">Пользователи</a>
+                                </li>
+                                }
+                            }
                         </ul>
                         @if (SignInManager.IsSignedIn(User))
                         {
+                            var currentUser = await UserManager.GetUserAsync(User);
+                            var userRole = await UserManager.GetRolesAsync(currentUser);
                             <ul class="navbar-nav">
                                 <li class="nav-item dropdown">
                                     <a class="btn dropdown-toggle" href="#" id="dropdown01" data-bs-toggle = "dropdown" aria-haspopup="true" aria-expanded="false">
-                                        @if (!string.IsNullOrEmpty(currentUser.ProfileImageUrl))
-                                        {
-                                            <img alt="Image" src="@currentUser.ProfileImageUrl" class="avatar avatar-xs">
-                                        }
-                                        else
-                                        {
-                                            <img alt="Image" src="/img/default.jpg" class="avatar avatar-xs"
-                                         width=40 height=40>
-                                        }
+                                            <img alt="Image" src="@PhotoHelper.GetProfileImageFullPath(currentUser.ProfileImageUrl)" class="avatar avatar-xs">
+
                                     </a>
                                     <div class="dropdown-menu" aria-labelledby="pagesDropdown">
                                         <a class="dropdown-item" asp-controller="User" asp-action="Detail" asp-route-id="@currentUser.Id">
-                                            <span class="h6 mb-0">View Profile</span>
+                                            <span class="h6 mb-0">Профиль</span>
                                         </a>
 
                                         <a class="dropdown-item" asp-controller="User" asp-action="EditProfile">
-                                            <span class="h6 mb-0">Edit Profile</span>
+                                            <span class="h6 mb-0">Изменение профиля</span>
                                         </a>
 
                                         <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">
-                                            <span su class="h6 mb-0">Logout</span>
+                                            <span su class="h6 mb-0">Выход</span>
                                         </a>
                                     </div>
                                 </li>

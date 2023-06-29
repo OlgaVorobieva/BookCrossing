@@ -11,7 +11,7 @@
         <div class="container">
             <div class="row justify-content-between align-items-center">
                 <div class="col-auto">
-                    <h1 class="h2">Account</h1>
+                    <h1 class="h2">Профиль</h1>
                 </div>
             </div>
         </div>
@@ -27,32 +27,59 @@
                             ? "/img/default.jpg"
                             : Model.ProfileImageUrl;
                         }
-                        <img alt="Image" src="@imageUrl" class="avatar avatar-lg mb-3 mb-md-0" width="80" height="80" />
+                        <img alt="Image" src="@imageUrl" class="avatar avatar-lg mb-3 mb-md-0" />
+                        <h5>@Html.DisplayFor(modelItem => Model.UserName)</h5>
                     </div>
                 </div>
             </div>
+            <br>
             <div class="row mb-4">
-                <div class="col">
-                    <h5>Имя пользователя : </h5>
-                    @Html.DisplayFor(modelItem => Model.UserName)
-                </div>
+                <b style="font-size : larger ; "> Баллы: @Html.DisplayFor(modelItem => Model.Points)</b>
             </div>
 
-            <div class="row mb-4">
-                <div class="col">
-                    <h5>Баллы : </h5>
-                    @Html.DisplayFor(modelItem => Model.Points)
+            @if (Model.bookedPlaces != null)
+            {
+                <div class="row">
+                    <div class="col-12 col-md-8 order-md-1">
+                        <h5>Ожидающие книги :</h5>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col">
+                                    <table class="table table-hover align-items-center table-borderless">
+                                        <tbody>
+                                            @foreach (var place in Model.bookedPlaces)
+                                            {
+                                                <tr class="bg-white">
+                                                    <th scope="row">
+                                                        <div class="media align-items-center">
+                                                            <img alt="Image profile avatar" src="/img/@place.PictureName" height="100" width="80">
+                                                            <a asp-controller="Place" asp-action="Details" asp-route-id="@place.Id">
+                                                                @place.Title
+                                                            </a>
+                                                        </div>
+                                                    </th>
+                                                    <td>
+                                                        <a class="btn btn-outline-primary" asp-controller="Place" asp-action="ConfirmBookReceipt" asp-route-id="@place.Id">Подтвердить получение</a>
+                                                    </td>
+
+                                                </tr>
+                                                <tr class="table-divider">
+                                                    <th></th>
+                                                    <td></td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!--end of col-->
+                            </div>
+                            <!--end of row-->
+                        </div>
+
+
+                    </div>
                 </div>
-            </div>
-
-            <div class="row">
-                <div class="col-12 col-md-8 order-md-1">
-                    <h5>Ваши Книги :</h5>
-
-
-
-                </div>
-            </div>
+            }
         </div>
     </section>
 

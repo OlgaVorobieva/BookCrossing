@@ -11,13 +11,12 @@ namespace BookCrossingApp.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
-        private readonly ApplicationDbContext _context;
+        //private readonly ApplicationDbContext _context;
 
         public AccountController(UserManager<AppUser> userManager, 
-            SignInManager<AppUser> signInManager,
-            ApplicationDbContext context)
+            SignInManager<AppUser> signInManager)//ApplicationDbContext context
         {
-            _context = context;
+            //_context = context;
             _signInManager = signInManager;
             _userManager = userManager;
         }
@@ -41,7 +40,7 @@ namespace BookCrossingApp.Controllers
                 //User is found, check password
                 if (!user.IsEnabled) 
                 {
-                    TempData["Error"] = "Current user is blocked";
+                    TempData["Error"] = "Пользователь заблокирован!";
                     return View(loginViewModel);
                 }
 
@@ -56,11 +55,11 @@ namespace BookCrossingApp.Controllers
                     }
                 }
                 //Password is incorrect
-                TempData["Error"] = "Wrong credentials. Please try again";
+                TempData["Error"] = "Неправильные логин или пароль. Пожалуйста попробуйте снова!";
                 return View(loginViewModel);
             }
             //User not found
-            TempData["Error"] = "Wrong credentials. Please try again";
+            TempData["Error"] = "Неправильные логин или пароль. Пожалуйста попробуйте снова!";
             return View(loginViewModel);
         }
 
@@ -79,7 +78,7 @@ namespace BookCrossingApp.Controllers
             var user = await _userManager.FindByEmailAsync(registerViewModel.EmailAddress);
             if (user != null)
             {
-                TempData["Error"] = "This email address is already in use";
+                TempData["Error"] = "Этот электронный адрес уже используется";
                 return View(registerViewModel);
             }
 
@@ -95,7 +94,7 @@ namespace BookCrossingApp.Controllers
             if (newUserResponse.Succeeded)
                 await _userManager.AddToRoleAsync(newUser, UserRoles.User);
 
-            return RedirectToAction("Index", "Race");
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]

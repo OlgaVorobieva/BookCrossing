@@ -60,25 +60,23 @@
             }
     </style>
 }
-<h1>Place Book</h1>
+<h1>Размещение книги</h1>
 
-<h4>Book</h4>
-<hr />
 <dl class="row">
     <dt class="col-sm-2">
-        @Html.DisplayNameFor(model => model.BCID)
+        BCID
     </dt>
     <dd class="col-sm-10">
         @Html.DisplayFor(model => model.BCID)
     </dd>
     <dt class="col-sm-2">
-        @Html.DisplayNameFor(model => model.Title)
+        Название
     </dt>
     <dd class="col-sm-10">
         @Html.DisplayFor(model => model.Title)
     </dd>
     <dt class="col-sm-2">
-        @Html.DisplayNameFor(model => model.Author)
+        Автор
     </dt>
     <dd class="col-sm-10">
         @Html.DisplayFor(model => model.Author)
@@ -96,22 +94,23 @@
             <input type="hidden" asp-for="Longitude"/>
             <input type="hidden" asp-for="Latitude" />
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-          
+          <br><br>
             <div class="form-group">
-                <label asp-for="PlaceDescription" class="control-label"></label>
-                <input asp-for="PlaceDescription" class="form-control" />
+                <dt>Описание места: </dt>
+                <input asp-for="PlaceDescription" class="form-control"  style="width: 1000px;height:120px;" />
                 <span asp-validation-for="PlaceDescription" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+                <input type="submit" value="Сохранить" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Назад к списку книг</a>
 </div>
+
 @section Scripts {
     <script type="text/javascript">
         var layer = new ol.layer.Tile({

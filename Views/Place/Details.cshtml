@@ -1,51 +1,127 @@
 ﻿@model BookCrossingApp.ViewModels.BookPlaceViewModel
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<AppUser> UserManager
+@section Head{
+    <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/css/ol.css" type="text/css">
+    <script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/build/ol.js"></script>
+    <style>
+        .map {
+            height: 300px;
+            width: 100%;
+        }
 
+    </style>
+}
 @{
     ViewData["Title"] = "Details";
 }
+@if (Model.Status == BookCrossingApp.Data.Enum.PlaceStatus.Active)
+{
+    <h1>Вы увены, что хотите выбрать эту книгу?</h1>
+}
 
-<h1>Вы увены, что хотите выбрать эту книгу?</h1>
 
 <div>
-    <h4>Книга</h4>
-    <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.BCID)
+        <dt class="col-sm-2">
+            Название
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.BCID)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Title)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Author)
+        <dt class="col-sm-2">
+            Автор
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Author)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
+            Описание
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Description)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.PlaceDescription)
+            Описание местоположения:
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.PlaceDescription)
         </dd>
     </dl>
+    <div id="map" class="map"></div>
+    @if (Model.Status == BookCrossingApp.Data.Enum.PlaceStatus.Active)
+    {
+        <form asp-action="TakeConfirmed">
+            <input type="hidden" asp-for="Id" />
+            <input type="submit" value="Взять" class="btn btn-danger" /> |
+            <a asp-controller="Home" asp-action="AllBooks">Вернуться к списку книг</a>
+        </form>
+    }
 
-    <form asp-action="TakeConfirmed">
-        <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Take" class="btn btn-danger" /> |
-        <a asp-controller="Home" asp-action="AllBooks">Вернуться к списку книг</a>
-    </form>
-    
+    @if (Model.Status == BookCrossingApp.Data.Enum.PlaceStatus.Visited)
+    {
+        var currentUser = await UserManager.GetUserAsync(User);
+        <form asp-action="ConfirmBookReceipt">
+            <input type="hidden" asp-for="Id" />
+            <input type="submit" value="Подтвердить получение" class="btn btn-danger" /> |
+            <a asp-controller="User" asp-action="Detail" asp-route-id="@currentUser.Id">Вернуться в профиль</a>
+        </form>
+    }
+
 </div>
+
+@section Scripts {
+    <script type="text/javascript">
+        var layer = new ol.layer.Tile({
+            source: new ol.source.OSM()
+        });
+        var center = ol.proj.fromLonLat([30.53, 59.93]);
+        var view = new ol.View({
+            center: center,
+            zoom: 10
+        });
+
+        var map = new ol.Map({
+            target: 'map',
+            view: view,
+            layers: [layer]
+        });
+
+        var vectorLayer = new ol.layer.Vector({
+            source: new ol.source.Vector(),
+            style: new ol.style.Style({
+                image: new ol.style.Icon({
+                    anchor: [0.5, 1],
+                    anchorXUnits: "fraction",
+                    anchorYUnits: "fraction",
+                    src: "https://docs.maptiler.com/openlayers/default-marker/marker-icon.png"
+                })
+            })
+        });
+        map.addLayer(vectorLayer);
+
+        function createMarker(lng, lat, id) {
+            var flng = parseFloat(lng);
+            var flat = parseFloat(lat);
+            return new ol.Feature({
+                geometry: new ol.geom.Point(ol.proj.fromLonLat([flng, flat])),
+                id: id
+            });
+        }
+
+        function showMarker() {
+            var lng = @Model.Longitude.ToString().Replace(",", ".");
+            var lat = @Model.Latitude.ToString().Replace(",", ".");
+            var id = @Model.Id;
+            vectorLayer.getSource().addFeature(
+                createMarker(lng, lat, id)
+            );
+        }
+
+        showMarker();
+
+
+
+    </script>
+}
+
