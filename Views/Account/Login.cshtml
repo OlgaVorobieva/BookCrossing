@@ -7,12 +7,12 @@
 <div class="row">
     <div class="col-md-6 offset-3">
         <p>
-            <h4>Log in to your account</h4>
+            <h4>Войдите в свой аккаунт</h4>
         </p>
         @if(TempData["Error"] != null)
         {
             <div class="col-md-12 alert alert-danger">
-                <span><b>Sorry!</b> - @TempData["Error"]</span>
+                <span><b>Ошибка!</b> - @TempData["Error"]</span>
             </div>
         }
         <div class="row">
@@ -20,17 +20,19 @@
                 <form asp-action="Login">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <div class="form-group">
-                        <label asp-for="EmailAddress" class="control-label"></label>
+                        @*<label asp-for="EmailAddress" class="control-label"></label>*@
+                        <p>Адрес электронной почты</p>
                         <input asp-for="EmailAddress" class="form-control">
                         <span asp-validation-for="EmailAddress" class="text-danger"></span>
                     </div>
                     <div class="form-group">
-                        <label asp-for="Password" class="control-label"></label>
+                        @*<label asp-for="Password" class="control-label"></label>*@
+                        <p>Пароль</p>
                         <input asp-for="Password" class="form-control" />
                         <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
                     <div class="form-group">
-                        <input class="btn btn-outline-success float right" type="submit" value="Log in" />
+                        <input class="btn btn-outline-success float right" type="submit" value="Войти" />
                     </div>
                 </form>
             </div>

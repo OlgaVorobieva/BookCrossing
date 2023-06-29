@@ -30,6 +30,12 @@ namespace BookCrossingApp.Repository
             return await _context.Places.Where(x => x.BookId == bookId).ToListAsync();
         }
 
+
+        public async Task<IEnumerable<Place>> GetAllBookedPlacesByUserId(string userId) 
+        {
+            return await _context.Places.Where(x=>(x.TakerUserId == userId && x.Status == PlaceStatus.Visited)).ToListAsync();
+        }
+
         public bool Add(Place place)
         {
             _context.Add(place);

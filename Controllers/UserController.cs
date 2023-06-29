@@ -5,6 +5,9 @@ using BookCrossingApp.ViewModels;
 using BookCrossingApp.Interfaces;
 using BookCrossingApp.Models;
 using BookCrossingApp.Data;
+using BookCrossingApp.Repository;//my
+using Microsoft.IdentityModel.Tokens;
+using BookCrossingApp.Helpers;
 
 namespace BookCrossingApp.Controllers
 {
@@ -12,12 +15,17 @@ namespace BookCrossingApp.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IPlaceRepository _placeRepository;
+        private readonly IBookRepository _bookRepository;
+        const string UploadsFolder = @"wwwroot\uploads\";
 
 
-        public UserController(IUserRepository userRepository, UserManager<AppUser> userManager)
+        public UserController(IUserRepository userRepository, UserManager<AppUser> userManager, IPlaceRepository placeRepository, IBookRepository bookRepository)
         {
             _userRepository = userRepository;
             _userManager = userManager;
+            _placeRepository = placeRepository;
+            _bookRepository = bookRepository;
         }
 
         [HttpGet("users")]
@@ -33,13 +41,18 @@ namespace BookCrossingApp.Controllers
                 {
                     Id = user.Id,
                     UserName = user.UserName,
-                    ProfileImageUrl = user.ProfileImageUrl ?? "/img/default.jpg",
+                    ProfileImageUrl = GetProfileImageFullPath(user.ProfileImageUrl),
                     isEnabled = user.IsEnabled,
                     userRole = userRoles.FirstOrDefault()
                 };
                 result.Add(userViewModel);
             }
             return View(result);
+        }
+
+        private static string GetProfileImageFullPath(string? profileImageUrl)
+        {
+            return profileImageUrl.IsNullOrEmpty() ? "/img/default.jpg" : "/uploads/" + profileImageUrl;
         }
 
         [HttpGet]
@@ -51,16 +64,41 @@ namespace BookCrossingApp.Controllers
                 return RedirectToAction("Index", "Users");
             }
 
-            var userDetailViewModel = new UserDetailViewModel()
+            List<PlaceBookedViewModel> bookedPlaces = new List<PlaceBookedViewModel>();
+            var userDetail = new UserDetailViewModel()
             {
                 Id = user.Id,
                 UserName = user.UserName,
-                ProfileImageUrl = user.ProfileImageUrl ?? "/img/default.jpg",
+                ProfileImageUrl = GetProfileImageFullPath(user.ProfileImageUrl),
                 Points = user.Points,
             };
-            return View(userDetailViewModel);
-        }
 
+            var items = await _placeRepository.GetAllBookedPlacesByUserId(user.Id);
+            if (items == null)
+            {
+                return View(userDetail);
+            }
+
+            foreach (var item in items)
+            {
+                var bookedPlace = new PlaceBookedViewModel()
+                {
+                    Id = item.Id,
+                    BookId = item.BookId,
+                };
+
+                var book = await _bookRepository.GetByIdAsync(item.BookId);
+
+                bookedPlace.Title = book.Title;
+                bookedPlace.PictureName = book.PictureName; 
+
+                bookedPlaces.Add(bookedPlace);
+            }
+
+            userDetail.bookedPlaces = bookedPlaces;
+
+            return View(userDetail);
+        }
 
         public async Task<IActionResult> ChangeStatus(string id)
         {
@@ -115,7 +153,7 @@ namespace BookCrossingApp.Controllers
 
             var editMV = new EditProfileViewModel()
             {
-                ProfileImageUrl = user.ProfileImageUrl,
+                ProfileImageUrl = GetProfileImageFullPath(user.ProfileImageUrl)
             };
             return View(editMV);
         }
@@ -137,25 +175,27 @@ namespace BookCrossingApp.Controllers
                 return View("Error");
             }
 
-            if (editVM.Image != null) // only update profile image
+            if (editVM.Image != null) 
             {
-                //var photoResult = await _photoService.AddPhotoAsync(editVM.Image);
+                try
+                {
+                    await PhotoHelper.AddPhotoAsync(editVM.Image);
+                    //delete previous
+                    if (!string.IsNullOrEmpty(user.ProfileImageUrl))
+                    {
+                        PhotoHelper.DeletePhoto(user.ProfileImageUrl);
+                    }
+                    user.ProfileImageUrl = PhotoHelper.GetFileName(editVM.Image);
+                    editVM.ProfileImageUrl = PhotoHelper.GetProfileImageFullPath(user.ProfileImageUrl);
+                    editVM.Username = user.UserName;
 
-                //if (photoResult.Error != null)
-                //{
-                //    ModelState.AddModelError("Image", "Failed to upload image");
-                //    return View("EditProfile", editVM);
-                //}
-
-                //if (!string.IsNullOrEmpty(user.ProfileImageUrl))
-                //{
-                //    _ = _photoService.DeletePhotoAsync(user.ProfileImageUrl);
-                //}
-
-                //user.ProfileImageUrl = photoResult.Url.ToString();
-                //editVM.ProfileImageUrl = user.ProfileImageUrl;
-
-                //await _userManager.UpdateAsync(user);
+                    await _userManager.UpdateAsync(user);
+                }
+                catch (Exception exception)
+                {
+                    ModelState.AddModelError("Image", "Failed to upload image " + exception.Message);
+                    return View("EditProfile", editVM);
+                }
 
                 return View(editVM);
             }

@@ -5,6 +5,7 @@ using BookCrossingApp.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 
 namespace BookCrossingApp.Controllers
 {
@@ -29,13 +30,21 @@ namespace BookCrossingApp.Controllers
             var result = data.Select(
                 p => new AllBooksViewModel { Id = p.Id, Latitude = p.Latitude, Longitude = p.Longitude })
                 .ToList();
-            return Json(result); //return Json(result, JsonRequestBehavior.AllowGet); 
+            return Json(result); 
         }
 
-        // GET: PlaceController
-        public ActionResult Index()
+        public async Task<IActionResult> ConfirmBookReceipt(int? id) 
         {
-            return View();
+            var place = await _placeRepository.GetByIdAsync(id.Value);
+            if (place == null)
+            {
+                return NotFound();
+            }
+
+            place.Status = Data.Enum.PlaceStatus.Inactive;
+            _placeRepository.Update(place);
+
+            return RedirectToAction("Detail", "User");////
         }
 
         // GET: Place/Details/5
@@ -64,14 +73,16 @@ namespace BookCrossingApp.Controllers
                 Title = book.Title,
                 Description = book.Description,
                 PlaceDescription = place.Description??string.Empty,
-
+                Status = place.Status,
             };
+            bookPlace.Longitude = place.Longitude.ToString();
+            bookPlace.Latitude = place.Latitude.ToString();
             return View(bookPlace);
         }
 
         [HttpPost] 
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> TakeConfirmed(int id)
+        public async Task<ActionResult> TakeConfirmed(int id)
         {
 
             var place = await _placeRepository.GetByIdAsync(id);
@@ -107,58 +118,16 @@ namespace BookCrossingApp.Controllers
             return RedirectToAction("AllBooks","Home");
         }
 
-            // GET: PlaceController/Create
-            public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: PlaceController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: PlaceController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: PlaceController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: PlaceController/Delete/5
-        //public ActionResult Delete(int id)
+        // GET: PlaceController/Create
+        //public ActionResult Create()
         //{
         //    return View();
         //}
 
-        // POST: PlaceController/Delete/5
+        //// POST: PlaceController/Create
         //[HttpPost]
         //[ValidateAntiForgeryToken]
-        //public ActionResult Delete(int id, IFormCollection collection)
+        //public ActionResult Create(IFormCollection collection)
         //{
         //    try
         //    {
@@ -169,5 +138,28 @@ namespace BookCrossingApp.Controllers
         //        return View();
         //    }
         //}
+
+        //// GET: PlaceController/Edit/5
+        //public ActionResult Edit(int id)
+        //{
+        //    return View();
+        //}
+
+        //// POST: PlaceController/Edit/5
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public ActionResult Edit(int id, IFormCollection collection)
+        //{
+        //    try
+        //    {
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    catch
+        //    {
+        //        return View();
+        //    }
+        //}
+
+        
     }
 }

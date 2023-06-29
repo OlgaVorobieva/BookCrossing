@@ -16,10 +16,11 @@
 <p>
     <a asp-action="Create">Добавить книгу</a>
 </p>
+
 <input type="text" id="myInput" placeholder="Поиск по автору и названию...">
 
 
-@Html.DropDownList("bookStatus", Html.GetEnumSelectList(typeof(BookStatus)), "Все книги", new { @onchange="filterTable(this.value)" } )
+@Html.DropDownList("bookCategorie", Html.GetEnumSelectList(typeof(BookCategories)), "Все книги", new { @onchange="filterTable(this.value)", @class="custom-select" })
 
 
 
@@ -75,7 +76,7 @@
                     @Html.DisplayFor(modelItem => item.Status)
                 </td>
                 <td>
-                    <img alt="Image" src="/img/@item.PictureName" class="avatar avatar-xs" width=80 height=80>
+                    <img alt="Image" src="/img/@item.PictureName" width="80" height="100">
                 </td>
 
                 <td>
@@ -103,15 +104,15 @@
 </table>
 <script>
     function filterTable(event) {
-        var filter = document.querySelector('#myInput').value.toUpperCase(); //event.target.value.toUpperCase();
-        var bookStatus = document.querySelector("#bookStatus");
-        var filterStatus = bookStatus.options[bookStatus.selectedIndex].innerText.toUpperCase();
+        var filter = document.querySelector('#myInput').value.toUpperCase();
+        var bookCategorie = document.querySelector("#bookCategorie");
+        var filterStatus = bookCategorie.options[bookCategorie.selectedIndex].innerText.toUpperCase();
         var rows = document.querySelector("#myTable tbody").rows;
 
         for (var i = 0; i < rows.length; i++) {
             var firstCol = rows[i].cells[1].textContent.toUpperCase();
             var secondCol = rows[i].cells[2].textContent.toUpperCase();
-            var fifthCol = rows[i].cells[5].textContent.toUpperCase();
+            var fifthCol = rows[i].cells[3].textContent.toUpperCase();
             if ((firstCol.indexOf(filter) > -1 || secondCol.indexOf(filter) > -1) && (filterStatus == "ВСЕ КНИГИ" || fifthCol.indexOf(filterStatus) > -1)) {
                 rows[i].style.display = "";
             } else {

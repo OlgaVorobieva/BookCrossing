@@ -1,4 +1,6 @@
-﻿namespace BookCrossingApp.ViewModels
+﻿using BookCrossingApp.Data.Enum;
+
+namespace BookCrossingApp.ViewModels
 {
     public class BookPlaceViewModel
     {
@@ -10,7 +12,6 @@
         public string PlaceDescription { get; set; }
         public string Longitude { get; set; }
         public string Latitude { get; set; }
-
-
+        public PlaceStatus Status { get; set; }
     }
 }
